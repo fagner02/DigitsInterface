@@ -1,0 +1,25 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.box {
+  width: 50%;
+  height: 500px;
+  background-color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.block {
+  background-color: rgb(177, 177, 184);
+  border-radius: 2px;
+  transform: perspective(500px) rotateX(0deg) rotateY(0deg);
+}
