@@ -19,8 +19,8 @@ body {
 }
 
 .block {
-  background-color: rgb(177, 177, 184);
+  background-color: hsl(0, 0%, 90%);
   border-radius: 2px;
-  transform: perspective(100px) rotateY(0deg);
-  transition: all 2s;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
