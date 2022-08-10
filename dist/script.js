@@ -37,7 +37,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var size = 10;
 var blocksNum = 784;
 var num = 0;
-var angle = 0;
 var activations = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -46,47 +45,48 @@ var activations = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 84, 185, 159, 151,
-    60, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 222,
-    254, 254, 254, 254, 241, 198, 198, 198, 198, 198, 198, 198, 198, 170, 52, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 67, 114, 72, 114, 163, 227, 254, 225, 254,
-    254, 254, 250, 229, 254, 254, 140, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 17, 66, 14, 67, 67, 67, 59, 21, 236, 254, 106, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 83, 253, 209, 18, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 233, 255, 83,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 129,
-    254, 238, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 59, 249, 254, 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 133, 254, 187, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 205, 248, 58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 126, 254, 182, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 75, 251, 240, 57, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 221, 254, 166, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 203, 254,
-    219, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    38, 254, 254, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 31, 224, 254, 115, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 133, 254, 254, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 61, 242, 254, 254, 52, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 121, 254, 254, 219, 40, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 121, 254, 207, 18,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 36, 56, 137, 201, 199, 95, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 45, 152, 234, 254, 254, 254, 254, 254, 250, 211, 151, 6, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 46, 153, 240, 254, 254, 227, 166, 133, 251,
+    200, 254, 229, 225, 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 153, 234, 254,
+    254, 187, 142, 8, 0, 0, 191, 40, 198, 246, 223, 253, 21, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 8, 126, 253, 254, 233, 128, 11, 0, 0, 0, 0, 210, 43, 70, 254, 254,
+    254, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 72, 243, 254, 228, 54, 0, 0, 0, 0, 3,
+    32, 116, 225, 242, 254, 255, 162, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 75, 240,
+    254, 223, 109, 138, 178, 178, 169, 210, 251, 231, 254, 254, 254, 232, 38, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 175, 244, 253, 255, 254, 254, 251, 254, 254,
+    254, 254, 254, 252, 171, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16,
+    136, 195, 176, 146, 153, 200, 254, 254, 254, 254, 150, 16, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 162, 254, 254, 241, 99, 3, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 118, 250, 254, 254,
+    90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100,
+    242, 254, 254, 211, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 54, 241, 254, 254, 242, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 131, 254, 254, 244, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 249, 254, 254, 152, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 228, 254, 254, 208, 8, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 78, 255, 254,
+    254, 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    209, 254, 254, 137, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 227, 255, 233, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 113, 255, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0,
 ];
 var Block = /** @class */ (function () {
     function Block(index) {
+        this.angle = 0;
         this.index = index;
         this.instantiate();
     }
     Block.prototype.setColor = function () {
-        // this.timeout = setTimeout(() => {
-        this.block.children[this.behind].style.backgroundColor =
-            "hsl(0, 0%, " +
-                (90 - Math.round((activations[this.index] + 1) / 2.83)) +
-                "%)";
-        this.block.style.transform = "rotateY(" + angle + "deg)";
-        // clearTimeout(this.timeout);
-        // }, 10 * this.index);
+        var color = (255 - activations[this.index]) / 2.55;
+        color = color > 98 ? 90 : color;
+        var child = this.block.children[this.behind];
+        child.style.backgroundColor = "hsl(0, 0%, " + color + "%)";
+        this.angle = this.angle == 0 ? 180 : 0;
+        this.block.style.transform = "rotateY(" + this.angle + "deg)";
         this.behind = this.behind == 0 ? 1 : 0;
     };
     Block.prototype.instantiate = function () {
@@ -108,9 +108,8 @@ var Block = /** @class */ (function () {
         back.style.height = size + "px";
         back.style.position = "absolute";
         // this.block.style.transform = "rotateY(0deg)";
-        var delay = Math.round(this.index / 20) * 150;
+        var delay = Math.round(this.index / 30) * 150;
         this.block.style.transition = "transform 2s " + delay + "ms";
-        console.log(this.block.style.transition);
         document.querySelector(".box").appendChild(this.block);
         this.behind = 0;
         this.block.appendChild(front);
@@ -143,7 +142,13 @@ function feedForward(layer) {
     return layer;
 }
 function evaluateInput() {
-    activations = activations.map(function (value) { return value / 255.0; });
+    for (var i = 0; i < blocks.length; i++) {
+        var childIndex = blocks[i].behind == 0 ? 1 : 0;
+        var child = blocks[i].block.children[childIndex];
+        var color = parseFloat(child.style.backgroundColor.split(" ")[2]);
+        color = color > 228 ? 255 : color;
+        activations[i] = (255.0 - color) / 255.0;
+    }
     var res = feedForward(activations);
     num = res.indexOf(Math.max.apply(Math, res));
     console.log(res);
@@ -156,7 +161,6 @@ function evaluateInput() {
         var context = canvas.getContext("2d");
         context.drawImage(img, 0, 0);
         var data = context.getImageData(0, 0, img.width, img.height).data;
-        angle = angle == 0 ? 180 : 0;
         for (var i = 0; i < data.length; i += 4) {
             activations[Math.min(i / 4)] = 255 - data[i];
             blocks[Math.min(i / 4)].setColor();
@@ -197,8 +201,52 @@ var boxSize = Math.sqrt(blocksNum) * (size + gapSize) - gapSize + "px";
 document.querySelector(".box").style.width = boxSize;
 document.querySelector(".box").style.height = boxSize;
 var blocks = [];
+var coordinates = { x: null, y: null };
+var drawing = false;
+document.querySelector(".box").addEventListener("mousedown", function (e) {
+    if (drawing && coordinates.x == null && coordinates.y == null) {
+        console.log(e.clientX, e.clientY);
+        coordinates.x = e.clientX;
+        coordinates.y = e.clientY;
+    }
+});
+document.querySelector(".box").addEventListener("mousemove", function (e) {
+    if (coordinates.x != null && coordinates.y != null) {
+        if (Math.abs(coordinates.x - e.clientX) > 5 ||
+            Math.abs(coordinates.y - e.clientY) > 5) {
+            coordinates.x = e.clientX;
+            coordinates.y = e.clientY;
+            console.log(e.clientX, e.clientY);
+            blocks.forEach(function (b) {
+                var rect = b.block.getBoundingClientRect();
+                if (Math.abs(rect.x + size / 2 - coordinates.x) < 12 &&
+                    Math.abs(rect.y + size / 2 - coordinates.y) < 12) {
+                    var color = 100 - Math.abs(rect.y + size / 2 - coordinates.y) / 0.12;
+                    var color2 = (parseFloat((b.block.children[b.behind == 0 ? 1 : 0]).style.backgroundColor.split(" ")[2]) /
+                        255) *
+                        90;
+                    if (color2 < color)
+                        color = color2;
+                    (b.block.children[b.behind == 0 ? 1 : 0]).style.backgroundColor = "hsl(0, 0%, " + (color2 - color) + "%)";
+                }
+            });
+        }
+    }
+});
+document.querySelector(".box").addEventListener("mouseup", function () {
+    coordinates.x = null;
+    coordinates.y = null;
+});
 function sleep(ms) {
     return new Promise(function (resolve) { return setTimeout(resolve, ms); });
+}
+function setDrawState() {
+    console.log("Drawing");
+    drawing = true;
+    activations = activations.map(function (value) { return 0; });
+    blocks.forEach(function (b) {
+        b.setColor();
+    });
 }
 function start() {
     return __awaiter(this, void 0, void 0, function () {
@@ -210,10 +258,9 @@ function start() {
                     for (i = 0; i < blocksNum; i++) {
                         blocks.push(new Block(i));
                     }
-                    return [4 /*yield*/, sleep(5000)];
+                    return [4 /*yield*/, sleep(500)];
                 case 1:
                     _a.sent();
-                    angle = angle == 0 ? 180 : 0;
                     for (i = 0; i < blocks.length; i++) {
                         blocks[i].setColor();
                     }
