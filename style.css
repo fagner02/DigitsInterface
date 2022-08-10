@@ -21,5 +21,6 @@ body {
 .block {
   background-color: rgb(177, 177, 184);
   border-radius: 2px;
-  transform: perspective(500px) rotateX(0deg) rotateY(0deg);
+  transform: perspective(100px) rotateY(0deg);
+  transition: all 2s;
 }
