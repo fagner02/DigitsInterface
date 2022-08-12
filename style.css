@@ -22,15 +22,11 @@ body {
 }
 
 .box {
-  width: 50%;
-  height: 500px;
   background-color: #fff;
   display: flex;
   flex-wrap: wrap;
   align-content: center;
   justify-content: center;
-  gap: 2px;
-  user-select: all;
 }
 
 .block {

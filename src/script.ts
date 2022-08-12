@@ -2,7 +2,7 @@ const blocksNum = 784;
 const size = Math.floor(
   (Math.min(window.innerHeight, window.innerWidth) * 0.8) / Math.sqrt(blocksNum)
 );
-console.log(size);
+
 let num = 0;
 let activations: number[] = [
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -212,22 +212,13 @@ function setDrawState() {
 
 async function start() {
   readFile();
-  for (let i = 0; i < blocksNum; i++) {
-    blocks.push(new Block(i));
-  }
-  await sleep(500);
-
-  for (let i = 0; i < blocks.length; i++) {
-    blocks[i].setColor();
-  }
 
   let box = <HTMLElement>document.querySelector(".box");
 
-  box.style.gap = 2 + "px";
-
-  const gapSize = parseInt(box.style.gap);
-  console.log(gapSize);
+  const gapSize = 2;
   const boxSize = Math.sqrt(blocksNum) * (size + gapSize) - gapSize + "px";
+
+  box.style.gap = gapSize + "px";
   box.style.width = boxSize;
   box.style.height = boxSize;
 
@@ -239,12 +230,10 @@ async function start() {
   box.addEventListener("mousemove", (e) => {
     move(e.clientX, e.clientY);
   });
-
   box.addEventListener("mouseup", () => {
     drawing = false;
     console.log("end");
   });
-
   box.addEventListener("mouseleave", () => {
     drawing = false;
     console.log("end");
@@ -258,11 +247,20 @@ async function start() {
   box.addEventListener("touchmove", (e) => {
     move(e.touches[0].clientX, e.touches[0].clientY);
   });
-
   box.addEventListener("touchend", () => {
     drawing = false;
     console.log("end");
   });
+
+  for (let i = 0; i < blocksNum; i++) {
+    blocks.push(new Block(i));
+  }
+
+  await sleep(500);
+
+  for (let i = 0; i < blocks.length; i++) {
+    blocks[i].setColor();
+  }
 }
 
 start();

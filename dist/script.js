@@ -36,7 +36,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var blocksNum = 784;
 var size = Math.floor((Math.min(window.innerHeight, window.innerWidth) * 0.8) / Math.sqrt(blocksNum));
-console.log(size);
 var num = 0;
 var activations = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -217,25 +216,15 @@ function setDrawState() {
 }
 function start() {
     return __awaiter(this, void 0, void 0, function () {
-        var i, i, box, gapSize, boxSize;
+        var box, gapSize, boxSize, i, i;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     readFile();
-                    for (i = 0; i < blocksNum; i++) {
-                        blocks.push(new Block(i));
-                    }
-                    return [4 /*yield*/, sleep(500)];
-                case 1:
-                    _a.sent();
-                    for (i = 0; i < blocks.length; i++) {
-                        blocks[i].setColor();
-                    }
                     box = document.querySelector(".box");
-                    box.style.gap = 2 + "px";
-                    gapSize = parseInt(box.style.gap);
-                    console.log(gapSize);
+                    gapSize = 2;
                     boxSize = Math.sqrt(blocksNum) * (size + gapSize) - gapSize + "px";
+                    box.style.gap = gapSize + "px";
                     box.style.width = boxSize;
                     box.style.height = boxSize;
                     box.addEventListener("mousedown", function (e) {
@@ -266,6 +255,15 @@ function start() {
                         drawing = false;
                         console.log("end");
                     });
+                    for (i = 0; i < blocksNum; i++) {
+                        blocks.push(new Block(i));
+                    }
+                    return [4 /*yield*/, sleep(500)];
+                case 1:
+                    _a.sent();
+                    for (i = 0; i < blocks.length; i++) {
+                        blocks[i].setColor();
+                    }
                     return [2 /*return*/];
             }
         });
