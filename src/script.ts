@@ -1,4 +1,3 @@
-const pixelResults: number[][] = [];
 const blocksNum = 784;
 const size = Math.floor(
   (Math.min(window.innerHeight, window.innerWidth) * 0.8) / Math.sqrt(blocksNum)
@@ -140,11 +139,23 @@ function evaluateInput() {
   num = res.indexOf(Math.max(...res));
   console.log("Done evaluating input");
 
-  for (let i = 0; i < activations.length; i++) {
-    activations[i] = pixelResults[num][i];
-    blocks[i].setColor();
-  }
-  console.log("Done setting colors");
+  let img = new Image(28, 28);
+  img.src = num + ".png";
+  img.onload = () => {
+    console.log("Loaded image");
+    let canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    let context = canvas.getContext("2d");
+    context.drawImage(img, 0, 0);
+    let data = context.getImageData(0, 0, img.width, img.height).data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      activations[i / 4] = 255 - data[i];
+      blocks[i / 4].setColor();
+    }
+    console.log("Done setting colors");
+  };
 }
 
 function readText(text: string) {
@@ -188,12 +199,14 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function setDrawState() {
+async function setDrawState() {
   console.log("Drawing");
   activations = activations.map((value) => 0);
   blocks.forEach((b) => {
     b.setColor();
   });
+  await sleep(Math.round(blocksNum / 30) * 150 + 2000);
+  console.log("Done drawing");
 }
 
 async function start() {
@@ -206,9 +219,6 @@ async function start() {
   for (let i = 0; i < blocks.length; i++) {
     blocks[i].setColor();
   }
-
-  setImages(0);
-  console.log("Done setting pixel results");
 
   let box = <HTMLElement>document.querySelector(".box");
 
@@ -265,32 +275,6 @@ async function start() {
     drawing = false;
     console.log("end");
   });
-}
-
-function setImages(i: number) {
-  let img = new Image(28, 28);
-  img.src = i + ".png";
-  img.onload = () => {
-    console.log("Loaded image");
-    let canvas = document.createElement("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
-
-    let context = canvas.getContext("2d");
-    context.drawImage(img, 0, 0);
-
-    let data = context.getImageData(0, 0, img.width, img.height).data;
-
-    pixelResults.push([]);
-    for (let k = 0; k < data.length; k += 4) {
-      pixelResults[i].push(255 - data[k]);
-    }
-    if (i == 9) {
-      return;
-    }
-    setImages(i + 1);
-    console.log("Done pixel colors");
-  };
 }
 
 start();

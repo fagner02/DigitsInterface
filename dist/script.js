@@ -34,7 +34,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var pixelResults = [];
 var blocksNum = 784;
 var size = Math.floor((Math.min(window.innerHeight, window.innerWidth) * 0.8) / Math.sqrt(blocksNum));
 console.log(size);
@@ -155,11 +154,22 @@ function evaluateInput() {
     var res = feedForward(activations);
     num = res.indexOf(Math.max.apply(Math, res));
     console.log("Done evaluating input");
-    for (var i = 0; i < activations.length; i++) {
-        activations[i] = pixelResults[num][i];
-        blocks[i].setColor();
-    }
-    console.log("Done setting colors");
+    var img = new Image(28, 28);
+    img.src = num + ".png";
+    img.onload = function () {
+        console.log("Loaded image");
+        var canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        var context = canvas.getContext("2d");
+        context.drawImage(img, 0, 0);
+        var data = context.getImageData(0, 0, img.width, img.height).data;
+        for (var i = 0; i < data.length; i += 4) {
+            activations[i / 4] = 255 - data[i];
+            blocks[i / 4].setColor();
+        }
+        console.log("Done setting colors");
+    };
 }
 function readText(text) {
     var inputs = text.split("\n");
@@ -196,10 +206,22 @@ function sleep(ms) {
     return new Promise(function (resolve) { return setTimeout(resolve, ms); });
 }
 function setDrawState() {
-    console.log("Drawing");
-    activations = activations.map(function (value) { return 0; });
-    blocks.forEach(function (b) {
-        b.setColor();
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    console.log("Drawing");
+                    activations = activations.map(function (value) { return 0; });
+                    blocks.forEach(function (b) {
+                        b.setColor();
+                    });
+                    return [4 /*yield*/, sleep(Math.round(blocksNum / 30) * 150 + 2000)];
+                case 1:
+                    _a.sent();
+                    console.log("Done drawing");
+                    return [2 /*return*/];
+            }
+        });
     });
 }
 function start() {
@@ -218,8 +240,6 @@ function start() {
                     for (i = 0; i < blocks.length; i++) {
                         blocks[i].setColor();
                     }
-                    setImages(0);
-                    console.log("Done setting pixel results");
                     box = document.querySelector(".box");
                     box.style.gap = 2 + "px";
                     gapSize = parseInt(box.style.gap);
@@ -270,28 +290,6 @@ function start() {
             }
         });
     });
-}
-function setImages(i) {
-    var img = new Image(28, 28);
-    img.src = i + ".png";
-    img.onload = function () {
-        console.log("Loaded image");
-        var canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        var context = canvas.getContext("2d");
-        context.drawImage(img, 0, 0);
-        var data = context.getImageData(0, 0, img.width, img.height).data;
-        pixelResults.push([]);
-        for (var k = 0; k < data.length; k += 4) {
-            pixelResults[i].push(255 - data[k]);
-        }
-        if (i == 9) {
-            return;
-        }
-        setImages(i + 1);
-        console.log("Done pixel colors");
-    };
 }
 start();
 //# sourceMappingURL=script.js.map
