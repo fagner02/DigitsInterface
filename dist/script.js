@@ -206,23 +206,14 @@ function sleep(ms) {
     return new Promise(function (resolve) { return setTimeout(resolve, ms); });
 }
 function setDrawState() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    console.log("Drawing");
-                    activations = activations.map(function (value) { return 0; });
-                    blocks.forEach(function (b) {
-                        b.setColor();
-                    });
-                    return [4 /*yield*/, sleep(Math.round(blocksNum / 30) * 150 + 2000)];
-                case 1:
-                    _a.sent();
-                    console.log("Done drawing");
-                    return [2 /*return*/];
-            }
-        });
+    console.log("Drawing");
+    activations = activations.map(function () { return 0; });
+    blocks.forEach(function (b) {
+        b.setColor();
     });
+    setTimeout(function () {
+        console.log("Done drawing");
+    }, Math.round(blocksNum / 30) * 150 + 2000);
 }
 function start() {
     return __awaiter(this, void 0, void 0, function () {

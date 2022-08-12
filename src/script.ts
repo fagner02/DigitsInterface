@@ -199,14 +199,15 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function setDrawState() {
+function setDrawState() {
   console.log("Drawing");
-  activations = activations.map((value) => 0);
+  activations = activations.map(() => 0);
   blocks.forEach((b) => {
     b.setColor();
   });
-  await sleep(Math.round(blocksNum / 30) * 150 + 2000);
-  console.log("Done drawing");
+  setTimeout(() => {
+    console.log("Done drawing");
+  }, Math.round(blocksNum / 30) * 150 + 2000);
 }
 
 async function start() {
