@@ -232,38 +232,11 @@ async function start() {
 
   box.addEventListener("mousedown", (e) => {
     drawing = true;
-    // if (coordinates.x == null && coordinates.y == null) {
-    coordinates.x = (<MouseEvent>e).clientX;
-    coordinates.y = (<MouseEvent>e).clientY;
-    // }
+    coordinates.x = e.clientX;
+    coordinates.y = e.clientY;
   });
   box.addEventListener("mousemove", (e) => {
-    if (drawing) {
-      if (
-        Math.abs(coordinates.x - (<MouseEvent>e).clientX) > size ||
-        Math.abs(coordinates.y - (<MouseEvent>e).clientY) > size
-      ) {
-        coordinates.x = (<MouseEvent>e).clientX;
-        coordinates.y = (<MouseEvent>e).clientY;
-        blocks.forEach((b) => {
-          let rect = b.block.getBoundingClientRect();
-          let x = Math.abs(rect.x + size / 2 - coordinates.x);
-          let y = Math.abs(rect.y + size / 2 - coordinates.y);
-          let brushWidth = 1.5;
-          if (x < size * brushWidth && y < size * brushWidth) {
-            let child = <HTMLElement>b.block.children[b.behind == 0 ? 1 : 0];
-
-            let color = 100 - ((x + y) / 2 / (size * brushWidth)) * 100;
-            let color2 =
-              parseFloat(child.style.backgroundColor.split(" ")[2]) / 2.55;
-            if (color2 < color) color = color2;
-
-            child.style.backgroundColor =
-              "hsl(0, 0%, " + (color2 - color) + "%)";
-          }
-        });
-      }
-    }
+    move(e.clientX, e.clientY);
   });
 
   box.addEventListener("mouseup", () => {
@@ -275,6 +248,56 @@ async function start() {
     drawing = false;
     console.log("end");
   });
+
+  box.addEventListener("touchstart", (e) => {
+    drawing = true;
+    coordinates.x = e.touches[0].clientX;
+    coordinates.y = e.touches[0].clientY;
+  });
+  box.addEventListener("touchmove", (e) => {
+    move(e.touches[0].clientX, e.touches[0].clientY);
+  });
+
+  box.addEventListener("touchend", () => {
+    drawing = false;
+    console.log("end");
+  });
 }
 
 start();
+
+function move(clientX: number, clientY: number) {
+  if (!drawing) {
+    return;
+  }
+
+  if (
+    !(
+      Math.abs(coordinates.x - clientX) > size ||
+      Math.abs(coordinates.y - clientY) > size
+    )
+  ) {
+    return;
+  }
+
+  coordinates.x = clientX;
+  coordinates.y = clientY;
+  blocks.forEach((b) => {
+    let rect = b.block.getBoundingClientRect();
+    let x = Math.abs(rect.x + size / 2 - coordinates.x);
+    let y = Math.abs(rect.y + size / 2 - coordinates.y);
+    let brushWidth = 1.5;
+
+    if (!(x < size * brushWidth && y < size * brushWidth)) {
+      return;
+    }
+
+    let child = <HTMLElement>b.block.children[b.behind == 0 ? 1 : 0];
+
+    let color = 100 - ((x + y) / 2 / (size * brushWidth)) * 100;
+    let color2 = parseFloat(child.style.backgroundColor.split(" ")[2]) / 2.55;
+    if (color2 < color) color = color2;
+
+    child.style.backgroundColor = "hsl(0, 0%, " + (color2 - color) + "%)";
+  });
+}

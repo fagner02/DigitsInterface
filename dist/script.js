@@ -249,34 +249,11 @@ function start() {
                     box.style.height = boxSize;
                     box.addEventListener("mousedown", function (e) {
                         drawing = true;
-                        // if (coordinates.x == null && coordinates.y == null) {
                         coordinates.x = e.clientX;
                         coordinates.y = e.clientY;
-                        // }
                     });
                     box.addEventListener("mousemove", function (e) {
-                        if (drawing) {
-                            if (Math.abs(coordinates.x - e.clientX) > size ||
-                                Math.abs(coordinates.y - e.clientY) > size) {
-                                coordinates.x = e.clientX;
-                                coordinates.y = e.clientY;
-                                blocks.forEach(function (b) {
-                                    var rect = b.block.getBoundingClientRect();
-                                    var x = Math.abs(rect.x + size / 2 - coordinates.x);
-                                    var y = Math.abs(rect.y + size / 2 - coordinates.y);
-                                    var brushWidth = 1.5;
-                                    if (x < size * brushWidth && y < size * brushWidth) {
-                                        var child = b.block.children[b.behind == 0 ? 1 : 0];
-                                        var color = 100 - ((x + y) / 2 / (size * brushWidth)) * 100;
-                                        var color2 = parseFloat(child.style.backgroundColor.split(" ")[2]) / 2.55;
-                                        if (color2 < color)
-                                            color = color2;
-                                        child.style.backgroundColor =
-                                            "hsl(0, 0%, " + (color2 - color) + "%)";
-                                    }
-                                });
-                            }
-                        }
+                        move(e.clientX, e.clientY);
                     });
                     box.addEventListener("mouseup", function () {
                         drawing = false;
@@ -286,10 +263,48 @@ function start() {
                         drawing = false;
                         console.log("end");
                     });
+                    box.addEventListener("touchstart", function (e) {
+                        drawing = true;
+                        coordinates.x = e.touches[0].clientX;
+                        coordinates.y = e.touches[0].clientY;
+                    });
+                    box.addEventListener("touchmove", function (e) {
+                        move(e.touches[0].clientX, e.touches[0].clientY);
+                    });
+                    box.addEventListener("touchend", function () {
+                        drawing = false;
+                        console.log("end");
+                    });
                     return [2 /*return*/];
             }
         });
     });
 }
 start();
+function move(clientX, clientY) {
+    if (!drawing) {
+        return;
+    }
+    if (!(Math.abs(coordinates.x - clientX) > size ||
+        Math.abs(coordinates.y - clientY) > size)) {
+        return;
+    }
+    coordinates.x = clientX;
+    coordinates.y = clientY;
+    blocks.forEach(function (b) {
+        var rect = b.block.getBoundingClientRect();
+        var x = Math.abs(rect.x + size / 2 - coordinates.x);
+        var y = Math.abs(rect.y + size / 2 - coordinates.y);
+        var brushWidth = 1.5;
+        if (!(x < size * brushWidth && y < size * brushWidth)) {
+            return;
+        }
+        var child = b.block.children[b.behind == 0 ? 1 : 0];
+        var color = 100 - ((x + y) / 2 / (size * brushWidth)) * 100;
+        var color2 = parseFloat(child.style.backgroundColor.split(" ")[2]) / 2.55;
+        if (color2 < color)
+            color = color2;
+        child.style.backgroundColor = "hsl(0, 0%, " + (color2 - color) + "%)";
+    });
+}
 //# sourceMappingURL=script.js.map
