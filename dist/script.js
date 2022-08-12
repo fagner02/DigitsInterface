@@ -34,8 +34,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var size = 10;
+var pixelResults = [];
 var blocksNum = 784;
+var size = Math.floor((Math.min(window.innerHeight, window.innerWidth) * 0.8) / Math.sqrt(blocksNum));
+console.log(size);
 var num = 0;
 var activations = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -142,6 +144,7 @@ function feedForward(layer) {
     return layer;
 }
 function evaluateInput() {
+    console.log("Evaluating input");
     for (var i = 0; i < blocks.length; i++) {
         var childIndex = blocks[i].behind == 0 ? 1 : 0;
         var child = blocks[i].block.children[childIndex];
@@ -151,21 +154,12 @@ function evaluateInput() {
     }
     var res = feedForward(activations);
     num = res.indexOf(Math.max.apply(Math, res));
-    console.log(res);
-    var img = new Image(28, 28);
-    img.src = num + ".png";
-    img.onload = function () {
-        var canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        var context = canvas.getContext("2d");
-        context.drawImage(img, 0, 0);
-        var data = context.getImageData(0, 0, img.width, img.height).data;
-        for (var i = 0; i < data.length; i += 4) {
-            activations[Math.min(i / 4)] = 255 - data[i];
-            blocks[Math.min(i / 4)].setColor();
-        }
-    };
+    console.log("Done evaluating input");
+    for (var i = 0; i < activations.length; i++) {
+        activations[i] = pixelResults[num][i];
+        blocks[i].setColor();
+    }
+    console.log("Done setting colors");
 }
 function readText(text) {
     var inputs = text.split("\n");
@@ -187,6 +181,7 @@ function readText(text) {
         }
         weights.push(result);
     }
+    console.log("Done reading text");
 }
 function readFile() {
     console.log("Reading values");
@@ -194,55 +189,14 @@ function readFile() {
         .then(function (response) { return response.text(); })
         .then(function (text) { return readText(text); });
 }
-document.querySelector(".box").style.gap = 2 + "px";
-var gapSize = parseInt(document.querySelector(".box").style.gap);
-console.log(gapSize);
-var boxSize = Math.sqrt(blocksNum) * (size + gapSize) - gapSize + "px";
-document.querySelector(".box").style.width = boxSize;
-document.querySelector(".box").style.height = boxSize;
 var blocks = [];
 var coordinates = { x: null, y: null };
 var drawing = false;
-document.querySelector(".box").addEventListener("mousedown", function (e) {
-    if (drawing && coordinates.x == null && coordinates.y == null) {
-        console.log(e.clientX, e.clientY);
-        coordinates.x = e.clientX;
-        coordinates.y = e.clientY;
-    }
-});
-document.querySelector(".box").addEventListener("mousemove", function (e) {
-    if (coordinates.x != null && coordinates.y != null) {
-        if (Math.abs(coordinates.x - e.clientX) > 5 ||
-            Math.abs(coordinates.y - e.clientY) > 5) {
-            coordinates.x = e.clientX;
-            coordinates.y = e.clientY;
-            console.log(e.clientX, e.clientY);
-            blocks.forEach(function (b) {
-                var rect = b.block.getBoundingClientRect();
-                if (Math.abs(rect.x + size / 2 - coordinates.x) < 12 &&
-                    Math.abs(rect.y + size / 2 - coordinates.y) < 12) {
-                    var color = 100 - Math.abs(rect.y + size / 2 - coordinates.y) / 0.12;
-                    var color2 = (parseFloat((b.block.children[b.behind == 0 ? 1 : 0]).style.backgroundColor.split(" ")[2]) /
-                        255) *
-                        90;
-                    if (color2 < color)
-                        color = color2;
-                    (b.block.children[b.behind == 0 ? 1 : 0]).style.backgroundColor = "hsl(0, 0%, " + (color2 - color) + "%)";
-                }
-            });
-        }
-    }
-});
-document.querySelector(".box").addEventListener("mouseup", function () {
-    coordinates.x = null;
-    coordinates.y = null;
-});
 function sleep(ms) {
     return new Promise(function (resolve) { return setTimeout(resolve, ms); });
 }
 function setDrawState() {
     console.log("Drawing");
-    drawing = true;
     activations = activations.map(function (value) { return 0; });
     blocks.forEach(function (b) {
         b.setColor();
@@ -250,7 +204,7 @@ function setDrawState() {
 }
 function start() {
     return __awaiter(this, void 0, void 0, function () {
-        var i, i;
+        var i, i, box, gapSize, boxSize;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -264,10 +218,80 @@ function start() {
                     for (i = 0; i < blocks.length; i++) {
                         blocks[i].setColor();
                     }
+                    setImages(0);
+                    console.log("Done setting pixel results");
+                    box = document.querySelector(".box");
+                    box.style.gap = 2 + "px";
+                    gapSize = parseInt(box.style.gap);
+                    console.log(gapSize);
+                    boxSize = Math.sqrt(blocksNum) * (size + gapSize) - gapSize + "px";
+                    box.style.width = boxSize;
+                    box.style.height = boxSize;
+                    box.addEventListener("mousedown", function (e) {
+                        drawing = true;
+                        // if (coordinates.x == null && coordinates.y == null) {
+                        coordinates.x = e.clientX;
+                        coordinates.y = e.clientY;
+                        // }
+                    });
+                    box.addEventListener("mousemove", function (e) {
+                        if (drawing) {
+                            if (Math.abs(coordinates.x - e.clientX) > size ||
+                                Math.abs(coordinates.y - e.clientY) > size) {
+                                coordinates.x = e.clientX;
+                                coordinates.y = e.clientY;
+                                blocks.forEach(function (b) {
+                                    var rect = b.block.getBoundingClientRect();
+                                    var x = Math.abs(rect.x + size / 2 - coordinates.x);
+                                    var y = Math.abs(rect.y + size / 2 - coordinates.y);
+                                    var brushWidth = 1.5;
+                                    if (x < size * brushWidth && y < size * brushWidth) {
+                                        var child = b.block.children[b.behind == 0 ? 1 : 0];
+                                        var color = 100 - ((x + y) / 2 / (size * brushWidth)) * 100;
+                                        var color2 = parseFloat(child.style.backgroundColor.split(" ")[2]) / 2.55;
+                                        if (color2 < color)
+                                            color = color2;
+                                        child.style.backgroundColor =
+                                            "hsl(0, 0%, " + (color2 - color) + "%)";
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    box.addEventListener("mouseup", function () {
+                        drawing = false;
+                        console.log("end");
+                    });
+                    box.addEventListener("mouseleave", function () {
+                        drawing = false;
+                        console.log("end");
+                    });
                     return [2 /*return*/];
             }
         });
     });
+}
+function setImages(i) {
+    var img = new Image(28, 28);
+    img.src = i + ".png";
+    img.onload = function () {
+        console.log("Loaded image");
+        var canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        var context = canvas.getContext("2d");
+        context.drawImage(img, 0, 0);
+        var data = context.getImageData(0, 0, img.width, img.height).data;
+        pixelResults.push([]);
+        for (var k = 0; k < data.length; k += 4) {
+            pixelResults[i].push(255 - data[k]);
+        }
+        if (i == 9) {
+            return;
+        }
+        setImages(i + 1);
+        console.log("Done pixel colors");
+    };
 }
 start();
 //# sourceMappingURL=script.js.map

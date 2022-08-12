@@ -1,5 +1,9 @@
-const size = 10;
+const pixelResults: number[][] = [];
 const blocksNum = 784;
+const size = Math.floor(
+  (Math.min(window.innerHeight, window.innerWidth) * 0.8) / Math.sqrt(blocksNum)
+);
+console.log(size);
 let num = 0;
 let activations: number[] = [
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -123,6 +127,7 @@ function feedForward(layer: number[]) {
 }
 
 function evaluateInput() {
+  console.log("Evaluating input");
   for (let i = 0; i < blocks.length; i++) {
     let childIndex = blocks[i].behind == 0 ? 1 : 0;
     let child = <HTMLElement>blocks[i].block.children[childIndex];
@@ -133,23 +138,13 @@ function evaluateInput() {
 
   let res = feedForward(activations);
   num = res.indexOf(Math.max(...res));
-  console.log(res);
+  console.log("Done evaluating input");
 
-  let img = new Image(28, 28);
-  img.src = num + ".png";
-  img.onload = () => {
-    let canvas = document.createElement("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
-    let context = canvas.getContext("2d");
-    context.drawImage(img, 0, 0);
-    let data = context.getImageData(0, 0, img.width, img.height).data;
-
-    for (let i = 0; i < data.length; i += 4) {
-      activations[Math.min(i / 4)] = 255 - data[i];
-      blocks[Math.min(i / 4)].setColor();
-    }
-  };
+  for (let i = 0; i < activations.length; i++) {
+    activations[i] = pixelResults[num][i];
+    blocks[i].setColor();
+  }
+  console.log("Done setting colors");
 }
 
 function readText(text: string) {
@@ -175,6 +170,7 @@ function readText(text: string) {
     }
     weights.push(result);
   }
+  console.log("Done reading text");
 }
 
 function readFile() {
@@ -184,66 +180,9 @@ function readFile() {
     .then((text) => readText(text));
 }
 
-(<HTMLElement>document.querySelector(".box")).style.gap = 2 + "px";
-
-const gapSize = parseInt(
-  (<HTMLElement>document.querySelector(".box")).style.gap
-);
-console.log(gapSize);
-const boxSize = Math.sqrt(blocksNum) * (size + gapSize) - gapSize + "px";
-(<HTMLElement>document.querySelector(".box")).style.width = boxSize;
-(<HTMLElement>document.querySelector(".box")).style.height = boxSize;
-
 let blocks: Block[] = [];
 let coordinates: { x: number; y: number } = { x: null, y: null };
 let drawing = false;
-document.querySelector(".box").addEventListener("mousedown", (e) => {
-  if (drawing && coordinates.x == null && coordinates.y == null) {
-    console.log((<MouseEvent>e).clientX, (<MouseEvent>e).clientY);
-    coordinates.x = (<MouseEvent>e).clientX;
-    coordinates.y = (<MouseEvent>e).clientY;
-  }
-});
-document.querySelector(".box").addEventListener("mousemove", (e) => {
-  if (coordinates.x != null && coordinates.y != null) {
-    if (
-      Math.abs(coordinates.x - (<MouseEvent>e).clientX) > 5 ||
-      Math.abs(coordinates.y - (<MouseEvent>e).clientY) > 5
-    ) {
-      coordinates.x = (<MouseEvent>e).clientX;
-      coordinates.y = (<MouseEvent>e).clientY;
-      console.log((<MouseEvent>e).clientX, (<MouseEvent>e).clientY);
-      blocks.forEach((b) => {
-        let rect = b.block.getBoundingClientRect();
-        if (
-          Math.abs(rect.x + size / 2 - coordinates.x) < 12 &&
-          Math.abs(rect.y + size / 2 - coordinates.y) < 12
-        ) {
-          let color = 100 - Math.abs(rect.y + size / 2 - coordinates.y) / 0.12;
-          let color2 =
-            (parseFloat(
-              (<HTMLElement>(
-                b.block.children[b.behind == 0 ? 1 : 0]
-              )).style.backgroundColor.split(" ")[2]
-            ) /
-              255) *
-            90;
-
-          if (color2 < color) color = color2;
-
-          (<HTMLElement>(
-            b.block.children[b.behind == 0 ? 1 : 0]
-          )).style.backgroundColor = "hsl(0, 0%, " + (color2 - color) + "%)";
-        }
-      });
-    }
-  }
-});
-
-document.querySelector(".box").addEventListener("mouseup", () => {
-  coordinates.x = null;
-  coordinates.y = null;
-});
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -251,7 +190,6 @@ function sleep(ms: number) {
 
 function setDrawState() {
   console.log("Drawing");
-  drawing = true;
   activations = activations.map((value) => 0);
   blocks.forEach((b) => {
     b.setColor();
@@ -268,6 +206,91 @@ async function start() {
   for (let i = 0; i < blocks.length; i++) {
     blocks[i].setColor();
   }
+
+  setImages(0);
+  console.log("Done setting pixel results");
+
+  let box = <HTMLElement>document.querySelector(".box");
+
+  box.style.gap = 2 + "px";
+
+  const gapSize = parseInt(box.style.gap);
+  console.log(gapSize);
+  const boxSize = Math.sqrt(blocksNum) * (size + gapSize) - gapSize + "px";
+  box.style.width = boxSize;
+  box.style.height = boxSize;
+
+  box.addEventListener("mousedown", (e) => {
+    drawing = true;
+    // if (coordinates.x == null && coordinates.y == null) {
+    coordinates.x = (<MouseEvent>e).clientX;
+    coordinates.y = (<MouseEvent>e).clientY;
+    // }
+  });
+  box.addEventListener("mousemove", (e) => {
+    if (drawing) {
+      if (
+        Math.abs(coordinates.x - (<MouseEvent>e).clientX) > size ||
+        Math.abs(coordinates.y - (<MouseEvent>e).clientY) > size
+      ) {
+        coordinates.x = (<MouseEvent>e).clientX;
+        coordinates.y = (<MouseEvent>e).clientY;
+        blocks.forEach((b) => {
+          let rect = b.block.getBoundingClientRect();
+          let x = Math.abs(rect.x + size / 2 - coordinates.x);
+          let y = Math.abs(rect.y + size / 2 - coordinates.y);
+          let brushWidth = 1.5;
+          if (x < size * brushWidth && y < size * brushWidth) {
+            let child = <HTMLElement>b.block.children[b.behind == 0 ? 1 : 0];
+
+            let color = 100 - ((x + y) / 2 / (size * brushWidth)) * 100;
+            let color2 =
+              parseFloat(child.style.backgroundColor.split(" ")[2]) / 2.55;
+            if (color2 < color) color = color2;
+
+            child.style.backgroundColor =
+              "hsl(0, 0%, " + (color2 - color) + "%)";
+          }
+        });
+      }
+    }
+  });
+
+  box.addEventListener("mouseup", () => {
+    drawing = false;
+    console.log("end");
+  });
+
+  box.addEventListener("mouseleave", () => {
+    drawing = false;
+    console.log("end");
+  });
+}
+
+function setImages(i: number) {
+  let img = new Image(28, 28);
+  img.src = i + ".png";
+  img.onload = () => {
+    console.log("Loaded image");
+    let canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    let context = canvas.getContext("2d");
+    context.drawImage(img, 0, 0);
+
+    let data = context.getImageData(0, 0, img.width, img.height).data;
+
+    pixelResults.push([]);
+    for (let k = 0; k < data.length; k += 4) {
+      pixelResults[i].push(255 - data[k]);
+    }
+    if (i == 9) {
+      return;
+    }
+    setImages(i + 1);
+    console.log("Done pixel colors");
+  };
 }
 
 start();

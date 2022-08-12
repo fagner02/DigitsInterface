@@ -7,6 +7,18 @@ body {
   align-items: center;
 }
 
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
 .box {
   width: 50%;
   height: 500px;
@@ -16,6 +28,7 @@ body {
   align-content: center;
   justify-content: center;
   gap: 2px;
+  user-select: all;
 }
 
 .block {
