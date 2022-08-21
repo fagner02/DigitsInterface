@@ -1,6 +1,7 @@
 const blocksNum = 784;
+const matrixSize = Math.sqrt(blocksNum);
 const size = Math.floor(
-  (Math.min(window.innerHeight, window.innerWidth) * 0.8) / Math.sqrt(blocksNum)
+  (Math.min(window.innerHeight, window.innerWidth) * 0.8) / matrixSize
 );
 
 let num = 0;
@@ -45,11 +46,13 @@ let activations: number[] = [
 class Block {
   block: HTMLElement;
   index: number;
+  position: number[];
   timeout: number;
   behind: number;
   angle = 0;
   constructor(index: number) {
     this.index = index;
+    this.position = [index / matrixSize, index % matrixSize];
     this.instantiate();
   }
   setColor() {
@@ -68,6 +71,8 @@ class Block {
     this.block.className = "block";
     this.block.style.width = size + "px";
     this.block.style.height = size + "px";
+    this.block.id = this.index.toString();
+
     let front = document.createElement("div");
     front.className = "block";
     front.style.backgroundColor = "hsl(0, 0%, 90%)";
@@ -75,13 +80,14 @@ class Block {
     front.style.height = size + "px";
     front.style.position = "absolute";
     front.style.transform = "rotateY(180deg)";
+
     let back = document.createElement("div");
     back.className = "block";
     back.style.backgroundColor = "hsl(0, 0%, 0%)";
     back.style.width = size + "px";
     back.style.height = size + "px";
     back.style.position = "absolute";
-    // this.block.style.transform = "rotateY(0deg)";
+
     let delay = Math.round(this.index / 30) * 150;
     this.block.style.transition = "transform 2s " + delay + "ms";
     (<Element>document.querySelector(".box")).appendChild(this.block);
@@ -209,14 +215,13 @@ function setDrawState() {
     console.log("Done drawing");
   }, Math.round(blocksNum / 30) * 150 + 2000);
 }
-
+const gapSize = 2;
 async function start() {
   readFile();
 
   let box = <HTMLElement>document.querySelector(".box");
 
-  const gapSize = 2;
-  const boxSize = Math.sqrt(blocksNum) * (size + gapSize) - gapSize + "px";
+  const boxSize = matrixSize * (size + gapSize) - gapSize + "px";
 
   box.style.gap = gapSize + "px";
   box.style.width = boxSize;
@@ -281,22 +286,51 @@ function move(clientX: number, clientY: number) {
 
   coordinates.x = clientX;
   coordinates.y = clientY;
-  blocks.forEach((b) => {
-    let rect = b.block.getBoundingClientRect();
-    let x = Math.abs(rect.x + size / 2 - coordinates.x);
-    let y = Math.abs(rect.y + size / 2 - coordinates.y);
-    let brushWidth = 1.5;
 
-    if (!(x < size * brushWidth && y < size * brushWidth)) {
-      return;
+  let brushWidth = 1.4;
+  let startPos = blocks[0].block.getBoundingClientRect();
+
+  for (let k = 0; k <= Math.ceil(brushWidth); k++) {
+    let length = (k / Math.ceil(brushWidth)) * brushWidth * (size + gapSize);
+    let hip = Math.sqrt(length ** 2 + (size + gapSize) ** 2);
+
+    let stepAngle = Math.asin((size + gapSize) / hip);
+    let m = 0;
+    for (let i = 0; i < Math.ceil((2 * Math.PI) / stepAngle); i++) {
+      let sideX = Math.sin(i * stepAngle) * length;
+      let sideY = Math.cos(i * stepAngle) * length;
+
+      let indexes = {
+        x: Math.floor((coordinates.x - startPos.x + sideX) / (size + gapSize)),
+        y: Math.floor((coordinates.y - startPos.y + sideY) / (size + gapSize)),
+      };
+
+      let b = blocks[indexes.y * matrixSize + indexes.x];
+      if (!b) {
+        continue;
+      }
+      // blocks.forEach((b) => {
+      let rect = b.block.getBoundingClientRect();
+      let x = Math.abs(rect.x + size / 2 - coordinates.x);
+      let y = Math.abs(rect.y + size / 2 - coordinates.y);
+
+      // if (!(x < size * brushWidth && y < size * brushWidth)) {
+      //   continue;
+      // }
+
+      let child = <HTMLElement>b.block.children[b.behind == 0 ? 1 : 0];
+
+      let a = 1 - (x + y) / 2 / ((size + gapSize) * brushWidth);
+      if (a < 0) a = 0;
+
+      let color = a * 50;
+      let color2 = parseFloat(child.style.backgroundColor.split(" ")[2]) / 2.55;
+      if (color2 < color) color = color2;
+
+      child.style.backgroundColor = `hsl(0, 0%, ${color2 - color}%)`;
+      // });
+      m++;
     }
-
-    let child = <HTMLElement>b.block.children[b.behind == 0 ? 1 : 0];
-
-    let color = 100 - ((x + y) / 2 / (size * brushWidth)) * 100;
-    let color2 = parseFloat(child.style.backgroundColor.split(" ")[2]) / 2.55;
-    if (color2 < color) color = color2;
-
-    child.style.backgroundColor = "hsl(0, 0%, " + (color2 - color) + "%)";
-  });
+    console.log(m);
+  }
 }

@@ -35,7 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var blocksNum = 784;
-var size = Math.floor((Math.min(window.innerHeight, window.innerWidth) * 0.8) / Math.sqrt(blocksNum));
+var matrixSize = Math.sqrt(blocksNum);
+var size = Math.floor((Math.min(window.innerHeight, window.innerWidth) * 0.8) / matrixSize);
 var num = 0;
 var activations = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -78,6 +79,7 @@ var Block = /** @class */ (function () {
     function Block(index) {
         this.angle = 0;
         this.index = index;
+        this.position = [index / matrixSize, index % matrixSize];
         this.instantiate();
     }
     Block.prototype.setColor = function () {
@@ -94,6 +96,7 @@ var Block = /** @class */ (function () {
         this.block.className = "block";
         this.block.style.width = size + "px";
         this.block.style.height = size + "px";
+        this.block.id = this.index.toString();
         var front = document.createElement("div");
         front.className = "block";
         front.style.backgroundColor = "hsl(0, 0%, 90%)";
@@ -107,7 +110,6 @@ var Block = /** @class */ (function () {
         back.style.width = size + "px";
         back.style.height = size + "px";
         back.style.position = "absolute";
-        // this.block.style.transform = "rotateY(0deg)";
         var delay = Math.round(this.index / 30) * 150;
         this.block.style.transition = "transform 2s " + delay + "ms";
         document.querySelector(".box").appendChild(this.block);
@@ -214,16 +216,16 @@ function setDrawState() {
         console.log("Done drawing");
     }, Math.round(blocksNum / 30) * 150 + 2000);
 }
+var gapSize = 2;
 function start() {
     return __awaiter(this, void 0, void 0, function () {
-        var box, gapSize, boxSize, i, i;
+        var box, boxSize, i, i;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     readFile();
                     box = document.querySelector(".box");
-                    gapSize = 2;
-                    boxSize = Math.sqrt(blocksNum) * (size + gapSize) - gapSize + "px";
+                    boxSize = matrixSize * (size + gapSize) - gapSize + "px";
                     box.style.gap = gapSize + "px";
                     box.style.width = boxSize;
                     box.style.height = boxSize;
@@ -280,20 +282,44 @@ function move(clientX, clientY) {
     }
     coordinates.x = clientX;
     coordinates.y = clientY;
-    blocks.forEach(function (b) {
-        var rect = b.block.getBoundingClientRect();
-        var x = Math.abs(rect.x + size / 2 - coordinates.x);
-        var y = Math.abs(rect.y + size / 2 - coordinates.y);
-        var brushWidth = 1.5;
-        if (!(x < size * brushWidth && y < size * brushWidth)) {
-            return;
+    var brushWidth = 1.4;
+    var startPos = blocks[0].block.getBoundingClientRect();
+    for (var k = 0; k <= Math.ceil(brushWidth); k++) {
+        var length_1 = (k / Math.ceil(brushWidth)) * brushWidth * (size + gapSize);
+        var hip = Math.sqrt(Math.pow(length_1, 2) + Math.pow((size + gapSize), 2));
+        var stepAngle = Math.asin((size + gapSize) / hip);
+        var m = 0;
+        for (var i = 0; i < Math.ceil((2 * Math.PI) / stepAngle); i++) {
+            var sideX = Math.sin(i * stepAngle) * length_1;
+            var sideY = Math.cos(i * stepAngle) * length_1;
+            var indexes = {
+                x: Math.floor((coordinates.x - startPos.x + sideX) / (size + gapSize)),
+                y: Math.floor((coordinates.y - startPos.y + sideY) / (size + gapSize))
+            };
+            var b = blocks[indexes.y * matrixSize + indexes.x];
+            if (!b) {
+                continue;
+            }
+            // blocks.forEach((b) => {
+            var rect = b.block.getBoundingClientRect();
+            var x = Math.abs(rect.x + size / 2 - coordinates.x);
+            var y = Math.abs(rect.y + size / 2 - coordinates.y);
+            // if (!(x < size * brushWidth && y < size * brushWidth)) {
+            //   continue;
+            // }
+            var child = b.block.children[b.behind == 0 ? 1 : 0];
+            var a = 1 - (x + y) / 2 / ((size + gapSize) * brushWidth);
+            if (a < 0)
+                a = 0;
+            var color = a * 50;
+            var color2 = parseFloat(child.style.backgroundColor.split(" ")[2]) / 2.55;
+            if (color2 < color)
+                color = color2;
+            child.style.backgroundColor = "hsl(0, 0%, ".concat(color2 - color, "%)");
+            // });
+            m++;
         }
-        var child = b.block.children[b.behind == 0 ? 1 : 0];
-        var color = 100 - ((x + y) / 2 / (size * brushWidth)) * 100;
-        var color2 = parseFloat(child.style.backgroundColor.split(" ")[2]) / 2.55;
-        if (color2 < color)
-            color = color2;
-        child.style.backgroundColor = "hsl(0, 0%, " + (color2 - color) + "%)";
-    });
+        console.log(m);
+    }
 }
 //# sourceMappingURL=script.js.map
