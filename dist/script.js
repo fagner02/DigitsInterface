@@ -89,7 +89,7 @@ var Block = /** @class */ (function () {
         this.block.style.transform = "rotateY(" + blockAngle + "deg)";
         setTimeout(function () {
             _this.block.style.backgroundColor = "hsl(0, 0%, " + color + "%)";
-        }, 700);
+        }, 650);
     };
     Block.prototype.instantiate = function () {
         this.block = document.createElement("div");
@@ -102,8 +102,6 @@ var Block = /** @class */ (function () {
     };
     return Block;
 }());
-var weights = [];
-var biases = [];
 function sigmoid(layer) {
     var newLayer = [];
     newLayer.fill(0.0, 0, layer.length - 1);
@@ -136,50 +134,11 @@ function evaluateInput() {
     var res = feedForward(activations);
     num = res.indexOf(Math.max.apply(Math, res));
     console.log("Done evaluating input");
-    var img = new Image(28, 28);
-    img.src = num + ".png";
-    img.onload = function () {
-        console.log("Loaded image");
-        var canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        var context = canvas.getContext("2d");
-        context.drawImage(img, 0, 0);
-        var data = context.getImageData(0, 0, img.width, img.height).data;
-        for (var i = 0; i < data.length; i += 4) {
-            activations[i / 4] = 255 - data[i];
-        }
-        rotateBlocks();
-        console.log("Done setting colors");
-    };
-}
-function readText(text) {
-    var inputs = text.split("\n");
-    var sizes = [784, 50, 50, 10];
-    for (var i = 0; i < sizes.length - 1; i++) {
-        var result = [];
-        biases.push([]);
-        for (var j = 0; j < sizes[i + 1]; j++) {
-            var temp = void 0;
-            result.push([]);
-            for (var k = 0; k < sizes[i]; k++) {
-                temp = parseFloat(inputs[0]);
-                inputs.shift();
-                result[j].push(temp);
-            }
-            temp = parseFloat(inputs[0]);
-            inputs.shift();
-            biases[i].push(temp);
-        }
-        weights.push(result);
+    for (var i = 0; i < digits[num].length; i++) {
+        activations[i] = digits[num][i];
     }
-    console.log("Done reading text");
-}
-function readFile() {
-    console.log("Reading values");
-    fetch("save.txt")
-        .then(function (response) { return response.text(); })
-        .then(function (text) { return readText(text); });
+    rotateBlocks();
+    console.log("Done setting colors");
 }
 var blocks = [];
 var coordinates = { x: null, y: null };
@@ -201,7 +160,7 @@ function rotateBlocks() {
                     if (!(i < blocks.length)) return [3 /*break*/, 4];
                     blocks[i].setColor();
                     chunk++;
-                    if (!(chunk == 20)) return [3 /*break*/, 3];
+                    if (!(chunk == 15)) return [3 /*break*/, 3];
                     chunk = 0;
                     return [4 /*yield*/, sleep(10)];
                 case 2:
@@ -225,7 +184,6 @@ function start() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    readFile();
                     box = document.querySelector(".box");
                     boxSize = matrixSize * (size + gapSize) - gapSize + "px";
                     box.style.gap = gapSize + "px";
@@ -241,11 +199,9 @@ function start() {
                     });
                     box.addEventListener("mouseup", function () {
                         drawing = false;
-                        console.log("end");
                     });
                     box.addEventListener("mouseleave", function () {
                         drawing = false;
-                        console.log("end");
                     });
                     box.addEventListener("touchstart", function (e) {
                         drawing = true;
@@ -257,7 +213,6 @@ function start() {
                     });
                     box.addEventListener("touchend", function () {
                         drawing = false;
-                        console.log("end");
                     });
                     for (i = 0; i < blocksNum; i++) {
                         blocks.push(new Block(i));
