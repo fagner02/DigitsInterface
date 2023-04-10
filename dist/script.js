@@ -37,6 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var blocksNum = 784;
 var matrixSize = Math.sqrt(blocksNum);
 var size = Math.floor((Math.min(window.innerHeight, window.innerWidth) * 0.8) / matrixSize);
+var gapSize = 2;
+var blockAngle = 0;
 var num = 0;
 var activations = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -77,45 +79,26 @@ var activations = [
 ];
 var Block = /** @class */ (function () {
     function Block(index) {
-        this.angle = 0;
         this.index = index;
-        this.position = [index / matrixSize, index % matrixSize];
         this.instantiate();
     }
     Block.prototype.setColor = function () {
+        var _this = this;
         var color = (255 - activations[this.index]) / 2.55;
         color = color > 98 ? 90 : color;
-        var child = this.block.children[this.behind];
-        child.style.backgroundColor = "hsl(0, 0%, " + color + "%)";
-        this.angle = this.angle == 0 ? 180 : 0;
-        this.block.style.transform = "rotateY(" + this.angle + "deg)";
-        this.behind = this.behind == 0 ? 1 : 0;
+        this.block.style.transform = "rotateY(" + blockAngle + "deg)";
+        setTimeout(function () {
+            _this.block.style.backgroundColor = "hsl(0, 0%, " + color + "%)";
+        }, 700);
     };
     Block.prototype.instantiate = function () {
         this.block = document.createElement("div");
         this.block.className = "block";
         this.block.style.width = size + "px";
         this.block.style.height = size + "px";
-        this.block.id = this.index.toString();
-        var front = document.createElement("div");
-        front.className = "block";
-        front.style.backgroundColor = "hsl(0, 0%, 90%)";
-        front.style.width = size + "px";
-        front.style.height = size + "px";
-        front.style.position = "absolute";
-        front.style.transform = "rotateY(180deg)";
-        var back = document.createElement("div");
-        back.className = "block";
-        back.style.backgroundColor = "hsl(0, 0%, 0%)";
-        back.style.width = size + "px";
-        back.style.height = size + "px";
-        back.style.position = "absolute";
-        var delay = Math.round(this.index / 30) * 150;
-        this.block.style.transition = "transform 2s " + delay + "ms";
+        this.block.style.backgroundColor = "hsl(0, 0%, 90%)";
+        this.block.style.transition = "transform 2s";
         document.querySelector(".box").appendChild(this.block);
-        this.behind = 0;
-        this.block.appendChild(front);
-        this.block.appendChild(back);
     };
     return Block;
 }());
@@ -146,9 +129,7 @@ function feedForward(layer) {
 function evaluateInput() {
     console.log("Evaluating input");
     for (var i = 0; i < blocks.length; i++) {
-        var childIndex = blocks[i].behind == 0 ? 1 : 0;
-        var child = blocks[i].block.children[childIndex];
-        var color = parseFloat(child.style.backgroundColor.split(" ")[2]);
+        var color = parseFloat(blocks[i].block.style.backgroundColor.split(" ")[2]);
         color = color > 228 ? 255 : color;
         activations[i] = (255.0 - color) / 255.0;
     }
@@ -167,8 +148,8 @@ function evaluateInput() {
         var data = context.getImageData(0, 0, img.width, img.height).data;
         for (var i = 0; i < data.length; i += 4) {
             activations[i / 4] = 255 - data[i];
-            blocks[i / 4].setColor();
         }
+        rotateBlocks();
         console.log("Done setting colors");
     };
 }
@@ -206,20 +187,41 @@ var drawing = false;
 function sleep(ms) {
     return new Promise(function (resolve) { return setTimeout(resolve, ms); });
 }
-function setDrawState() {
-    console.log("Drawing");
-    activations = activations.map(function () { return 0; });
-    blocks.forEach(function (b) {
-        b.setColor();
+function rotateBlocks() {
+    return __awaiter(this, void 0, void 0, function () {
+        var chunk, i;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    blockAngle = blockAngle == 0 ? 360 : 0;
+                    chunk = 0;
+                    i = 0;
+                    _a.label = 1;
+                case 1:
+                    if (!(i < blocks.length)) return [3 /*break*/, 4];
+                    blocks[i].setColor();
+                    chunk++;
+                    if (!(chunk == 20)) return [3 /*break*/, 3];
+                    chunk = 0;
+                    return [4 /*yield*/, sleep(10)];
+                case 2:
+                    _a.sent();
+                    _a.label = 3;
+                case 3:
+                    i++;
+                    return [3 /*break*/, 1];
+                case 4: return [2 /*return*/];
+            }
+        });
     });
-    setTimeout(function () {
-        console.log("Done drawing");
-    }, Math.round(blocksNum / 30) * 150 + 2000);
 }
-var gapSize = 2;
+function setDrawState() {
+    activations = activations.map(function () { return 0; });
+    rotateBlocks();
+}
 function start() {
     return __awaiter(this, void 0, void 0, function () {
-        var box, boxSize, i, i;
+        var box, boxSize, i;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -263,9 +265,7 @@ function start() {
                     return [4 /*yield*/, sleep(500)];
                 case 1:
                     _a.sent();
-                    for (i = 0; i < blocks.length; i++) {
-                        blocks[i].setColor();
-                    }
+                    rotateBlocks();
                     return [2 /*return*/];
             }
         });
@@ -288,7 +288,6 @@ function move(clientX, clientY) {
         var length_1 = (k / Math.ceil(brushWidth)) * brushWidth * (size + gapSize);
         var hip = Math.sqrt(Math.pow(length_1, 2) + Math.pow((size + gapSize), 2));
         var stepAngle = Math.asin((size + gapSize) / hip);
-        var m = 0;
         for (var i = 0; i < Math.ceil((2 * Math.PI) / stepAngle); i++) {
             var sideX = Math.sin(i * stepAngle) * length_1;
             var sideY = Math.cos(i * stepAngle) * length_1;
@@ -300,26 +299,18 @@ function move(clientX, clientY) {
             if (!b) {
                 continue;
             }
-            // blocks.forEach((b) => {
             var rect = b.block.getBoundingClientRect();
             var x = Math.abs(rect.x + size / 2 - coordinates.x);
             var y = Math.abs(rect.y + size / 2 - coordinates.y);
-            // if (!(x < size * brushWidth && y < size * brushWidth)) {
-            //   continue;
-            // }
-            var child = b.block.children[b.behind == 0 ? 1 : 0];
             var a = 1 - (x + y) / 2 / ((size + gapSize) * brushWidth);
             if (a < 0)
                 a = 0;
             var color = a * 50;
-            var color2 = parseFloat(child.style.backgroundColor.split(" ")[2]) / 2.55;
+            var color2 = parseFloat(b.block.style.backgroundColor.split(" ")[2]) / 2.55;
             if (color2 < color)
                 color = color2;
-            child.style.backgroundColor = "hsl(0, 0%, ".concat(color2 - color, "%)");
-            // });
-            m++;
+            b.block.style.backgroundColor = "hsl(0, 0%, ".concat(color2 - color, "%)");
         }
-        console.log(m);
     }
 }
 //# sourceMappingURL=script.js.map

@@ -3,7 +3,9 @@ const matrixSize = Math.sqrt(blocksNum);
 const size = Math.floor(
   (Math.min(window.innerHeight, window.innerWidth) * 0.8) / matrixSize
 );
+const gapSize = 2;
 
+let blockAngle = 0;
 let num = 0;
 let activations: number[] = [
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -46,54 +48,29 @@ let activations: number[] = [
 class Block {
   block: HTMLElement;
   index: number;
-  position: number[];
-  timeout: number;
-  behind: number;
-  angle = 0;
   constructor(index: number) {
     this.index = index;
-    this.position = [index / matrixSize, index % matrixSize];
     this.instantiate();
   }
   setColor() {
     let color = (255 - activations[this.index]) / 2.55;
     color = color > 98 ? 90 : color;
-    let child = <HTMLElement>this.block.children[this.behind];
-    child.style.backgroundColor = "hsl(0, 0%, " + color + "%)";
 
-    this.angle = this.angle == 0 ? 180 : 0;
-    this.block.style.transform = "rotateY(" + this.angle + "deg)";
+    this.block.style.transform = "rotateY(" + blockAngle + "deg)";
 
-    this.behind = this.behind == 0 ? 1 : 0;
+    setTimeout(() => {
+      this.block.style.backgroundColor = "hsl(0, 0%, " + color + "%)";
+    }, 700);
   }
   instantiate() {
     this.block = document.createElement("div");
     this.block.className = "block";
     this.block.style.width = size + "px";
     this.block.style.height = size + "px";
-    this.block.id = this.index.toString();
+    this.block.style.backgroundColor = "hsl(0, 0%, 90%)";
+    this.block.style.transition = "transform 2s";
 
-    let front = document.createElement("div");
-    front.className = "block";
-    front.style.backgroundColor = "hsl(0, 0%, 90%)";
-    front.style.width = size + "px";
-    front.style.height = size + "px";
-    front.style.position = "absolute";
-    front.style.transform = "rotateY(180deg)";
-
-    let back = document.createElement("div");
-    back.className = "block";
-    back.style.backgroundColor = "hsl(0, 0%, 0%)";
-    back.style.width = size + "px";
-    back.style.height = size + "px";
-    back.style.position = "absolute";
-
-    let delay = Math.round(this.index / 30) * 150;
-    this.block.style.transition = "transform 2s " + delay + "ms";
     (<Element>document.querySelector(".box")).appendChild(this.block);
-    this.behind = 0;
-    this.block.appendChild(front);
-    this.block.appendChild(back);
   }
 }
 
@@ -134,9 +111,7 @@ function feedForward(layer: number[]) {
 function evaluateInput() {
   console.log("Evaluating input");
   for (let i = 0; i < blocks.length; i++) {
-    let childIndex = blocks[i].behind == 0 ? 1 : 0;
-    let child = <HTMLElement>blocks[i].block.children[childIndex];
-    let color = parseFloat(child.style.backgroundColor.split(" ")[2]);
+    let color = parseFloat(blocks[i].block.style.backgroundColor.split(" ")[2]);
     color = color > 228 ? 255 : color;
     activations[i] = (255.0 - color) / 255.0;
   }
@@ -158,8 +133,8 @@ function evaluateInput() {
 
     for (let i = 0; i < data.length; i += 4) {
       activations[i / 4] = 255 - data[i];
-      blocks[i / 4].setColor();
     }
+    rotateBlocks();
     console.log("Done setting colors");
   };
 }
@@ -205,17 +180,24 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function setDrawState() {
-  console.log("Drawing");
-  activations = activations.map(() => 0);
-  blocks.forEach((b) => {
-    b.setColor();
-  });
-  setTimeout(() => {
-    console.log("Done drawing");
-  }, Math.round(blocksNum / 30) * 150 + 2000);
+async function rotateBlocks() {
+  blockAngle = blockAngle == 0 ? 360 : 0;
+  let chunk = 0;
+  for (let i = 0; i < blocks.length; i++) {
+    blocks[i].setColor();
+    chunk++;
+    if (chunk == 20) {
+      chunk = 0;
+      await sleep(10);
+    }
+  }
 }
-const gapSize = 2;
+
+function setDrawState() {
+  activations = activations.map(() => 0);
+  rotateBlocks();
+}
+
 async function start() {
   readFile();
 
@@ -237,11 +219,9 @@ async function start() {
   });
   box.addEventListener("mouseup", () => {
     drawing = false;
-    console.log("end");
   });
   box.addEventListener("mouseleave", () => {
     drawing = false;
-    console.log("end");
   });
 
   box.addEventListener("touchstart", (e) => {
@@ -254,7 +234,6 @@ async function start() {
   });
   box.addEventListener("touchend", () => {
     drawing = false;
-    console.log("end");
   });
 
   for (let i = 0; i < blocksNum; i++) {
@@ -263,9 +242,7 @@ async function start() {
 
   await sleep(500);
 
-  for (let i = 0; i < blocks.length; i++) {
-    blocks[i].setColor();
-  }
+  rotateBlocks();
 }
 
 start();
@@ -295,7 +272,7 @@ function move(clientX: number, clientY: number) {
     let hip = Math.sqrt(length ** 2 + (size + gapSize) ** 2);
 
     let stepAngle = Math.asin((size + gapSize) / hip);
-    let m = 0;
+
     for (let i = 0; i < Math.ceil((2 * Math.PI) / stepAngle); i++) {
       let sideX = Math.sin(i * stepAngle) * length;
       let sideY = Math.cos(i * stepAngle) * length;
@@ -309,28 +286,20 @@ function move(clientX: number, clientY: number) {
       if (!b) {
         continue;
       }
-      // blocks.forEach((b) => {
+
       let rect = b.block.getBoundingClientRect();
       let x = Math.abs(rect.x + size / 2 - coordinates.x);
       let y = Math.abs(rect.y + size / 2 - coordinates.y);
-
-      // if (!(x < size * brushWidth && y < size * brushWidth)) {
-      //   continue;
-      // }
-
-      let child = <HTMLElement>b.block.children[b.behind == 0 ? 1 : 0];
 
       let a = 1 - (x + y) / 2 / ((size + gapSize) * brushWidth);
       if (a < 0) a = 0;
 
       let color = a * 50;
-      let color2 = parseFloat(child.style.backgroundColor.split(" ")[2]) / 2.55;
+      let color2 =
+        parseFloat(b.block.style.backgroundColor.split(" ")[2]) / 2.55;
       if (color2 < color) color = color2;
 
-      child.style.backgroundColor = `hsl(0, 0%, ${color2 - color}%)`;
-      // });
-      m++;
+      b.block.style.backgroundColor = `hsl(0, 0%, ${color2 - color}%)`;
     }
-    console.log(m);
   }
 }
